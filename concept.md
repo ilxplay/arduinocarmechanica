@@ -1,8 +1,8 @@
 je moeder
-cyberfuck
-  ->voorlichten(rood/groen led) obstakel=rood niks=groen
-  ->afstandsensor(obviously)
-  ->touch sensor aan deur(voor alarm)
-  ->buzzer voor alarm als iemand de touch sensor aanraakt
-  ->microfoon jij zegt kreun=buzzer kreunt
-  ->besturing met joystick op auto zelf
+cyberfuck <br />
+  ->voorlichten(rood/groen led) obstakel=rood niks=groen <br />
+  ->afstandsensor(obviously) <br />
+  ->touch sensor aan deur(voor alarm) <br />
+  ->buzzer voor alarm als iemand de touch sensor aanraakt <br />
+  ->microfoon jij zegt kreun=buzzer kreunt <br />
+  ->besturing met joystick op auto zelf <br />
