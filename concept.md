@@ -5,4 +5,4 @@ cyberfuck
   ->touch sensor aan deur(voor alarm)
   ->buzzer voor alarm als iemand de touch sensor aanraakt
   ->microfoon zegt kreun=buzzer kreunt
-  ->besturing met joystivk op auto zelf
+  ->besturing met joystick op auto zelf
