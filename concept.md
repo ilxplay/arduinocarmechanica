@@ -1,4 +1,6 @@
 je moeder
-## cyberfuck concept brainstorming
-
-123123
+cyberfuck
+  ->voorlichten(rood/groen led) obstakel=rood niks=groen
+  ->afstandsensor(obviously)
+  ->touch sensor aan deur(voor alarm)
+  ->buzzer voor alarm als iemand de touch sensor aanraakt
