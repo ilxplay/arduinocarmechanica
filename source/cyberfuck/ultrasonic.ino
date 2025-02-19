@@ -1,6 +1,9 @@
+#include "globals.h"
+
+
 const int TRIG_PINS[] = {2, 4, 6, 8};
 const int ECHO_PINS[] = {3, 5, 7, 9};
-const int NUM_SENSORS = 4;
+const int NUM_SENSORS = 1;
 
 long duration[NUM_SENSORS];
 int distance[NUM_SENSORS];
@@ -22,7 +25,7 @@ int measureDistance(int sensorIndex) {
   delayMicroseconds(2);
   
   digitalWrite(TRIG_PINS[sensorIndex], HIGH);
-  delayMicroseconds(10);
+  delayMicroseconds(5);
   digitalWrite(TRIG_PINS[sensorIndex], LOW);
   
   duration[sensorIndex] = pulseIn(ECHO_PINS[sensorIndex], HIGH);

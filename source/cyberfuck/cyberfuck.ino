@@ -3,11 +3,11 @@ void setup() {
   Serial.begin(9600); 
   //buzzerSetup();
   //shockDetectionSetup();
-  //ultrasonicSetup();
+  ultrasonicSetup();
   motorSetup();
 }
 void loop() {
-  //ultrasonicLoop();
+  ultrasonicLoop();
   //shockDetectionLoop();
   motorLoop();
 }
