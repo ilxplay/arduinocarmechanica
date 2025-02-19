@@ -1,20 +1,47 @@
-// Ultrasonic sensor setup and reading
-const int trigPin = 9;
-const int echoPin = 10;
+const int TRIG_PINS[] = {2, 4, 6, 8};
+const int ECHO_PINS[] = {3, 5, 7, 9};
+const int NUM_SENSORS = 4;
 
-void setupUltrasonic() {
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
+long duration[NUM_SENSORS];
+int distance[NUM_SENSORS];
+
+void ultrasonicSetup() {
+  Serial.begin(9600);
+  
+  for(int i = 0; i < NUM_SENSORS; i++) {
+    pinMode(TRIG_PINS[i], OUTPUT);
+    pinMode(ECHO_PINS[i], INPUT);
+    digitalWrite(TRIG_PINS[i], LOW);
+  }
+  
+  Serial.println("Ultrasonic Sensor System Initialized");
 }
 
-long readUltrasonicDistance() {
-  digitalWrite(trigPin, LOW);
+int measureDistance(int sensorIndex) {
+  digitalWrite(TRIG_PINS[sensorIndex], LOW);
   delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
+  
+  digitalWrite(TRIG_PINS[sensorIndex], HIGH);
   delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
-  long duration = pulseIn(echoPin, HIGH);
-  long distance = duration * 0.0344 / 2;
-  return distance;
+  digitalWrite(TRIG_PINS[sensorIndex], LOW);
+  
+  duration[sensorIndex] = pulseIn(ECHO_PINS[sensorIndex], HIGH);
+  
+  return duration[sensorIndex] * 0.0343 / 2;
 }
+
+void ultrasonicLoop() {
+  for(int i = 0; i < NUM_SENSORS; i++) {
+    distance[i] = measureDistance(i);
+    Serial.print("Sensor ");
+    Serial.print(i + 1);
+    Serial.print(": ");
+    Serial.print(distance[i]);
+    Serial.println(" cm");
+  }
+  
+  delay(100);
+  
+  Serial.println("---------------");
+}
+
