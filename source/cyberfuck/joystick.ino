@@ -13,7 +13,7 @@ int data[2];
 
 
 void joystickSetup(void){
-  Serial.begin(1200);
+  Serial.begin(2400);
   radio.begin();                      //it activates the modem
   radio.openWritingPipe(pipe);        //sets the address of the receiver to which the program will send data
 }
