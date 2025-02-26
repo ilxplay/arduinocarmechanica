@@ -1,4 +1,4 @@
-#include <SPI.h>  //the communication interface with diddy
+#include <SPI.h>  //the communication interface
 
 
 //define the data pins
