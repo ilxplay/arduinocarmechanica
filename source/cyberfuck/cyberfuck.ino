@@ -1,13 +1,17 @@
 
 void setup() {
-  Serial.begin(9600); 
+  
   //buzzerSetup();
   //shockDetectionSetup();
   ultrasonicSetup();
   motorSetup();
+  //lcdsetup();
+  joystickSetup();
 }
 void loop() {
   ultrasonicLoop();
   //shockDetectionLoop();
   motorLoop();
+  joystickLoop();
+  
 }

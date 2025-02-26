@@ -5,7 +5,7 @@ int in2 = 12; // IN2 connected to digital pin 12
 int in3 = 11; // IN3 connected to digital pin 11 
 int in4 = 10; // IN4 connected to digital pin 10 
 
-const int OBSTACLE_THRESHOLD = 10; // Distance threshold in cm
+const int OBSTACLE_THRESHOLD = 8; // Distance threshold in cm
 
 void motorSetup() { 
   pinMode(in1, OUTPUT);
@@ -63,6 +63,7 @@ void motorLoop() {
     Serial.println("cm");
   }
 
+  /*
   // Print current motor states
   Serial.print("Motor pins state - IN1: ");
   Serial.print(digitalRead(in1));
@@ -72,7 +73,7 @@ void motorLoop() {
   Serial.print(digitalRead(in3));
   Serial.print(" IN4: ");
   Serial.println(digitalRead(in4));
-
+*/
   if(isObstacleDetected()) {
     Serial.println("Obstacle detected! Stopping and turning...");
     stopMotors();
