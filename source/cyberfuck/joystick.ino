@@ -1,4 +1,4 @@
-#include <SPI.h>  //the communication interface with the modem
+#include <SPI.h>  //the communication interface with diddy
 
 
 //define the data pins
