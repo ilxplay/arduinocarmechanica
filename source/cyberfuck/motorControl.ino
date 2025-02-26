@@ -5,7 +5,14 @@ int in2 = 12; // IN2 connected to digital pin 12
 int in3 = 11; // IN3 connected to digital pin 11 
 int in4 = 10; // IN4 connected to digital pin 10 
 
-const int OBSTACLE_THRESHOLD = 8; // Distance threshold in cm
+const int JOYSTICK_X = A8;  // X-axis analog pin
+const int JOYSTICK_Y = A9;  // Y-axis analog pin
+const int JOYSTICK_BUTTON = 2;  // Optional button pin
+
+const int JOYSTICK_DEADZONE = 100;
+const int JOYSTICK_CENTER = 512; 
+const int OBSTACLE_THRESHOLD = 8; 
+const bool OBSTACLE_AVOIDANCE_ENABLED = true; 
 
 void motorSetup() { 
   pinMode(in1, OUTPUT);
@@ -17,13 +24,44 @@ void motorSetup() {
   digitalWrite(in2, HIGH); 
   digitalWrite(in3, HIGH); 
   digitalWrite(in4, HIGH); 
-} 
+  
+  // Setup joystick pins
+  pinMode(JOYSTICK_X, INPUT);
+  pinMode(JOYSTICK_Y, INPUT);
+  pinMode(JOYSTICK_BUTTON, INPUT_PULLUP);  // Using internal pullup resistor
+  
+  Serial.println("Motor and joystick setup complete");
+}
 
 void moveForward() {
   Serial.println("Moving Forward");
   digitalWrite(in1, LOW);  // Motor A forward
   digitalWrite(in2, HIGH);
   digitalWrite(in3, LOW);  // Motor B forward
+  digitalWrite(in4, HIGH);
+}
+
+void moveBackward() {
+  Serial.println("Moving Backward");
+  digitalWrite(in1, HIGH);  // Motor A backward
+  digitalWrite(in2, LOW);
+  digitalWrite(in3, HIGH);  // Motor B backward
+  digitalWrite(in4, LOW);
+}
+
+void turnRight() {
+  Serial.println("Turning Right");
+  digitalWrite(in1, LOW);   // Motor A forward
+  digitalWrite(in2, HIGH);
+  digitalWrite(in3, HIGH);  // Motor B backward
+  digitalWrite(in4, LOW);
+}
+
+void turnLeft() {
+  Serial.println("Turning Left");
+  digitalWrite(in1, HIGH);  // Motor A backward
+  digitalWrite(in2, LOW);
+  digitalWrite(in3, LOW);   // Motor B forward
   digitalWrite(in4, HIGH);
 }
 
@@ -35,12 +73,20 @@ void stopMotors() {
   digitalWrite(in4, HIGH);
 }
 
-void turnRight() {
-  Serial.println("Turning Right");
-  digitalWrite(in1, LOW);   // Motor A forward
+void moveRightForward() {
+  Serial.println("Moving Right-Forward");
+  digitalWrite(in1, LOW);   // Motor A forward (full speed)
   digitalWrite(in2, HIGH);
-  digitalWrite(in3, HIGH);  // Motor B backward
-  digitalWrite(in4, LOW);
+  digitalWrite(in3, LOW);   // Motor B forward (reduced speed - implemented via PWM in advanced version)
+  digitalWrite(in4, HIGH);
+}
+
+void moveLeftForward() {
+  Serial.println("Moving Left-Forward");
+  digitalWrite(in1, LOW);   // Motor A forward (reduced speed - implemented via PWM in advanced version)
+  digitalWrite(in2, HIGH);
+  digitalWrite(in3, LOW);   // Motor B forward (full speed)
+  digitalWrite(in4, HIGH);
 }
 
 bool isObstacleDetected() {
@@ -52,8 +98,50 @@ bool isObstacleDetected() {
   return false;
 }
 
+void handleJoystickControl() {
+  int xValue = analogRead(JOYSTICK_X);
+  int yValue = analogRead(JOYSTICK_Y);
+  int buttonState = digitalRead(JOYSTICK_BUTTON);
+  
+  int xOffset = xValue - JOYSTICK_CENTER;
+  int yOffset = yValue - JOYSTICK_CENTER;
+  
+  /*
+  Serial.print("Joystick X: ");
+  Serial.print(xValue);
+  Serial.print(" (");
+  Serial.print(xOffset);
+  Serial.print("), Y: ");
+  Serial.print(yValue);
+  Serial.print(" (");
+  Serial.print(yOffset);
+  Serial.print("), Button: ");
+  Serial.println(buttonState);
+  */
+  
+  if (abs(xOffset) < JOYSTICK_DEADZONE && abs(yOffset) < JOYSTICK_DEADZONE) {
+    stopMotors();
+    return;
+  }
+  
+ 
+  if (abs(yOffset) > abs(xOffset)) {
+    if (yOffset < 0) {
+      moveForward();
+    } else {
+      moveBackward();
+    }
+  } else {
+    if (xOffset > 0) {
+      turnRight();
+    } else {
+      turnLeft();
+    }
+  }
+  
+}
+
 void motorLoop() {
-  // Print all sensor distances
   Serial.println("\nCurrent sensor readings:");
   for(int i = 0; i < NUM_SENSORS; i++) {
     Serial.print("Sensor ");
@@ -61,34 +149,18 @@ void motorLoop() {
     Serial.print(": ");
     Serial.print(distance[i]);
     Serial.println("cm");
-    
-    
-
   }
 
-  /*
-  // Print current motor states
-  Serial.print("Motor pins state - IN1: ");
-  Serial.print(digitalRead(in1));
-  Serial.print(" IN2: ");
-  Serial.print(digitalRead(in2));
-  Serial.print(" IN3: ");
-  Serial.print(digitalRead(in3));
-  Serial.print(" IN4: ");
-  Serial.println(digitalRead(in4));
-*/
-
-
-  if(isObstacleDetected()) {
+  if (OBSTACLE_AVOIDANCE_ENABLED && isObstacleDetected()) {
     Serial.println("Obstacle detected! Stopping and turning...");
     stopMotors();
-    delay(50);  // Brief pause
+    delay(50);  
     turnRight();
-    delay(1000); // Turn for 1 second
+    delay(1000);
   } else {
-    moveForward();
-    delay(50);
+    
+    handleJoystickControl();
   }
   
-  delay(100); // Short delay to make the debug output readable
+  delay(100);
 }

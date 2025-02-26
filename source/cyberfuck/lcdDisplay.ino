@@ -5,9 +5,7 @@ void lcdSetup() {
 lcd.begin(16, 2);
 lcd.print("CyberFuck");
 }
-
 /*
 void lcdLoop() {
 }
 */
-
