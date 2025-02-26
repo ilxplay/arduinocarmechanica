@@ -8,5 +8,4 @@ extern int distance[];
 //joystick
 extern int dataX;
 extern int dataY;
-
 #endif
