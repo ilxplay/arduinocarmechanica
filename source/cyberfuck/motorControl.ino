@@ -61,6 +61,9 @@ void motorLoop() {
     Serial.print(": ");
     Serial.print(distance[i]);
     Serial.println("cm");
+    
+    
+
   }
 
   /*
@@ -74,6 +77,8 @@ void motorLoop() {
   Serial.print(" IN4: ");
   Serial.println(digitalRead(in4));
 */
+
+
   if(isObstacleDetected()) {
     Serial.println("Obstacle detected! Stopping and turning...");
     stopMotors();

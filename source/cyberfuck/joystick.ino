@@ -11,11 +11,8 @@ int dataY;
 
 int data[2];
 
-
 void joystickSetup(void){
   Serial.begin(2400);
-  radio.begin();                      //it activates the modem
-  radio.openWritingPipe(pipe);        //sets the address of the receiver to which the program will send data
 }
 
 void joystickLoop(){
@@ -28,6 +25,6 @@ void joystickLoop(){
 
   Serial.print("Data X:"); Serial.println(dataX);
   Serial.print("Data Y:"); Serial.println(dataY);
-  radio.write(data, sizeof(data));
+  
   
 }
