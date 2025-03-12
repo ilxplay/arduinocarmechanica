@@ -4,6 +4,7 @@ void setup() {
   //buzzerSetup();
   //shockDetectionSetup();
   //lcdsetup();
+  
   ultrasonicSetup();
   motorSetup();
   

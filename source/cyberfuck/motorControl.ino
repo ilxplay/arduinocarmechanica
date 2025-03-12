@@ -7,12 +7,14 @@ int in4 = 10; // IN4 connected to digital pin 10
 
 const int JOYSTICK_X = A8;  // X-axis analog pin
 const int JOYSTICK_Y = A9;  // Y-axis analog pin
-const int JOYSTICK_BUTTON = 2;  // Optional button pin
+const int JOYSTICK_BUTTON = 9;  // Optional button pin
 
 const int JOYSTICK_DEADZONE = 100;
 const int JOYSTICK_CENTER = 512; 
 const int OBSTACLE_THRESHOLD = 8; 
 const bool OBSTACLE_AVOIDANCE_ENABLED = false; 
+
+int switchState = 1;
 
 void motorSetup() { 
   pinMode(in1, OUTPUT);
@@ -28,7 +30,7 @@ void motorSetup() {
   // Setup joystick pins
   pinMode(JOYSTICK_X, INPUT);
   pinMode(JOYSTICK_Y, INPUT);
-  pinMode(JOYSTICK_BUTTON, INPUT_PULLUP);  // Using internal pullup resistor
+  pinMode(JOYSTICK_BUTTON, INPUT_PULLUP);
   
   Serial.println("Motor and joystick setup complete");
 }
@@ -105,7 +107,7 @@ void handleJoystickControl() {
   
   int xOffset = xValue - JOYSTICK_CENTER;
   int yOffset = yValue - JOYSTICK_CENTER;
-  
+
   /*
   Serial.print("Joystick X: ");
   Serial.print(xValue);
@@ -138,11 +140,11 @@ void handleJoystickControl() {
       turnLeft();
     }
   }
-  
 }
 
 void motorLoop() {
   Serial.println("\nCurrent sensor readings:");
+  
   for(int i = 0; i < NUM_SENSORS; i++) {
     Serial.print("Sensor ");
     Serial.print(i);
@@ -160,7 +162,7 @@ void motorLoop() {
     turnRight();
     delay(1000);
   } else {
-    
+    handleJoystickControl();
   }
   
   delay(10);
