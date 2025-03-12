@@ -12,7 +12,7 @@ const int JOYSTICK_BUTTON = 2;  // Optional button pin
 const int JOYSTICK_DEADZONE = 100;
 const int JOYSTICK_CENTER = 512; 
 const int OBSTACLE_THRESHOLD = 8; 
-const bool OBSTACLE_AVOIDANCE_ENABLED = true; 
+const bool OBSTACLE_AVOIDANCE_ENABLED = false; 
 
 void motorSetup() { 
   pinMode(in1, OUTPUT);
@@ -51,18 +51,18 @@ void moveBackward() {
 
 void turnRight() {
   Serial.println("Turning Right");
-  digitalWrite(in1, LOW);   // Motor A forward
-  digitalWrite(in2, HIGH);
-  digitalWrite(in3, HIGH);  // Motor B backward
-  digitalWrite(in4, LOW);
+  digitalWrite(in2, LOW);   // Motor A forward
+  digitalWrite(in1, HIGH);
+  digitalWrite(in4, HIGH);  // Motor B backward
+  digitalWrite(in3, LOW);
 }
 
 void turnLeft() {
   Serial.println("Turning Left");
-  digitalWrite(in1, HIGH);  // Motor A backward
-  digitalWrite(in2, LOW);
-  digitalWrite(in3, LOW);   // Motor B forward
-  digitalWrite(in4, HIGH);
+  digitalWrite(in2, HIGH);  // Motor A backward
+  digitalWrite(in1, LOW);
+  digitalWrite(in4, LOW);   // Motor B forward
+  digitalWrite(in3, HIGH);
 }
 
 void stopMotors() {
@@ -151,16 +151,18 @@ void motorLoop() {
     Serial.println("cm");
   }
 
+  handleJoystickControl();
+
   if (OBSTACLE_AVOIDANCE_ENABLED && isObstacleDetected()) {
     Serial.println("Obstacle detected! Stopping and turning...");
     stopMotors();
-    delay(50);  
+    delay(50);
     turnRight();
     delay(1000);
   } else {
     
-    handleJoystickControl();
   }
   
-  delay(100);
+  delay(10);
 }
+
