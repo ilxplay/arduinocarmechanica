@@ -7,11 +7,12 @@ void setup() {
 
   ultrasonicSetup();
   motorSetup();
+  handleJoystickControl();
   
 }
 void loop() {
   //shockDetectionLoop();
-  if(buttonState == 1){
+  if(buttonState.handleJoystickControl() == 1){
     ultrasonicLoop();
   }
   motorLoop();

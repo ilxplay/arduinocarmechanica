@@ -14,5 +14,4 @@ extern int distance[];
 //joystick
 extern int dataX;
 extern int dataY;
-extern int buttonState;
 #endif
