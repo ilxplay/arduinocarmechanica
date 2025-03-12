@@ -14,7 +14,6 @@ const int JOYSTICK_CENTER = 512;
 const int OBSTACLE_THRESHOLD = 8; 
 const bool OBSTACLE_AVOIDANCE_ENABLED = false; 
 
-int switchState = 1;
 
 void motorSetup() { 
   pinMode(in1, OUTPUT);

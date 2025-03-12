@@ -4,14 +4,16 @@ void setup() {
   //buzzerSetup();
   //shockDetectionSetup();
   //lcdsetup();
-  
+
   ultrasonicSetup();
   motorSetup();
   
 }
 void loop() {
   //shockDetectionLoop();
-  ultrasonicLoop();
+  if(buttonState == 1){
+    ultrasonicLoop();
+  }
   motorLoop();
   
 }
