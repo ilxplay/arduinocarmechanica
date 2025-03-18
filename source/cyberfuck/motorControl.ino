@@ -39,7 +39,7 @@ void motorA(int speed) {
     speed = abs(speed);
     analogWrite(in1, speed);
   }
-  else if (speed = 0) {
+  else if (speed == 0) {
     digitalWrite(in1, LOW);
     digitalWrite(in2, LOW);
   }
@@ -53,7 +53,7 @@ void motorB(int speed) {
     speed = abs(speed);
     analogWrite(in3, speed);
   }
-  else if (speed = 0) {
+  else if (speed == 0) {
     digitalWrite(in3, LOW);
     digitalWrite(in4, LOW);
   }
@@ -127,6 +127,7 @@ bool isObstacleDetected() {
   return false;
 }
 
+
 void handleJoystickControl() {
   int xValue = analogRead(JOYSTICK_X);
   int yValue = analogRead(JOYSTICK_Y);
@@ -169,6 +170,71 @@ void handleJoystickControl() {
   }
 }
 
+
+void autopilot() {
+  if (!OBSTACLE_AVOIDANCE_ENABLED) return;
+  
+  bool frontBlocked = (distance[SENSOR_FRONT] < OBSTACLE_THRESHOLD && distance[SENSOR_FRONT] > 0);
+  bool leftBlocked = (distance[SENSOR_LEFT] < OBSTACLE_THRESHOLD && distance[SENSOR_LEFT] > 0);
+  bool rightBlocked = (distance[SENSOR_RIGHT] < OBSTACLE_THRESHOLD && distance[SENSOR_RIGHT] > 0);
+  bool backBlocked = (distance[SENSOR_BACK] < OBSTACLE_THRESHOLD && distance[SENSOR_BACK] > 0);
+  
+  /*
+  Serial.println("Autopilot Status:");
+  Serial.print("Front: "); Serial.print(frontBlocked ? "BLOCKED" : "CLEAR");
+  Serial.print(" ("); Serial.print(distance[SENSOR_FRONT]); Serial.println("cm)");
+  Serial.print("Left: "); Serial.print(leftBlocked ? "BLOCKED" : "CLEAR");
+  Serial.print(" ("); Serial.print(distance[SENSOR_LEFT]); Serial.println("cm)");
+  Serial.print("Right: "); Serial.print(rightBlocked ? "BLOCKED" : "CLEAR");
+  Serial.print(" ("); Serial.print(distance[SENSOR_RIGHT]); Serial.println("cm)");
+  Serial.print("Back: "); Serial.print(backBlocked ? "BLOCKED" : "CLEAR");
+  Serial.print(" ("); Serial.print(distance[SENSOR_BACK]); Serial.println("cm)");
+  */
+
+
+  if (!frontBlocked && !leftBlocked && !rightBlocked) {
+    moveForward();
+    return;
+  }
+  
+  if (frontBlocked) {
+    if (!leftBlocked && !rightBlocked) {
+      if (distance[SENSOR_LEFT] > distance[SENSOR_RIGHT]) {
+        Serial.println("Front blocked, turning left (more space)");
+        turnLeft();
+      } else {
+        Serial.println("Front blocked, turning right (more space)");
+        turnRight();
+      }
+    } else if (!leftBlocked) {
+      Serial.println("Front blocked, right blocked, turning left");
+      turnLeft();
+    } else if (!rightBlocked) {
+      Serial.println("Front blocked, left blocked, turning right");
+      turnRight();
+    } else if (!backBlocked) {
+      Serial.println("Front, left, and right blocked, moving backward");
+      moveBackward();
+    } else {
+      Serial.println("All directions blocked, stopping");
+      stopMotors();
+    }
+    return;
+  }
+  
+  if (leftBlocked && !rightBlocked) {
+    Serial.println("Left blocked, moving right-forward");
+    moveRightForward();
+  } else if (rightBlocked && !leftBlocked) {
+    Serial.println("Right blocked, moving left-forward");
+    moveLeftForward();
+  } else {
+    Serial.println("Sides blocked, moving forward carefully");
+    moveForward();
+  }
+}
+
+
 void motorLoop() {
   Serial.println("\nCurrent sensor readings:");
   
@@ -182,12 +248,8 @@ void motorLoop() {
 
   handleJoystickControl();
 
-  if (OBSTACLE_AVOIDANCE_ENABLED && isObstacleDetected()) {
-    Serial.println("Obstacle detected! Stopping and turning...");
-    stopMotors();
-    delay(50);
-    turnRight();
-    delay(1000);
+  if (OBSTACLE_AVOIDANCE_ENABLED) {
+    autopilot();
   } else {
     handleJoystickControl();
   }

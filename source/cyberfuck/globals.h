@@ -7,6 +7,11 @@
 // sensor 2 left
 // sensor 3 right
 
+const int SENSOR_BACK = 0;
+const int SENSOR_FRONT = 1;
+const int SENSOR_LEFT = 2;
+const int SENSOR_RIGHT = 3;
+
 //ultrasonic
 extern const int NUM_SENSORS;
 extern int distance[];
