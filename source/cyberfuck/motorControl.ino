@@ -34,12 +34,40 @@ void motorSetup() {
   Serial.println("Motor and joystick setup complete");
 }
 
+void motorA(int speed) {
+  if (speed < 0) {
+    speed = abs(speed);
+    analogWrite(in1, speed);
+  }
+  else if (speed = 0) {
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, LOW);
+  }
+  else if (speed > 0) {
+    analogWrite(in2, speed);
+  }
+}
+
+void motorB(int speed) {
+  if (speed < 0) {
+    speed = abs(speed);
+    analogWrite(in3, speed);
+  }
+  else if (speed = 0) {
+    digitalWrite(in3, LOW);
+    digitalWrite(in4, LOW);
+  }
+  else if (speed > 0) {
+    analogWrite(in4, speed);
+  }
+}
+
 void moveForward() {
   Serial.println("Moving Forward");
-  digitalWrite(in1, LOW);  // Motor A forward
-  digitalWrite(in2, HIGH);
-  digitalWrite(in3, LOW);  // Motor B forward
-  digitalWrite(in4, HIGH);
+  digitalWrite(in1, LOW);  // Motor A(rechts) backwards
+  digitalWrite(in2, HIGH); // Motor A(rechts) forward
+  digitalWrite(in3, LOW);  // Motor B(links) backwards
+  digitalWrite(in4, HIGH); // Motor B(links) forwards
 }
 
 void moveBackward() {
