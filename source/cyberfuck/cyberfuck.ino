@@ -12,9 +12,6 @@ void setup() {
 }
 void loop() {
   //shockDetectionLoop();
-  if(buttonState.handleJoystickControl() == 1){
-    ultrasonicLoop();
-  }
+  ultrasonicLoop();
   motorLoop();
-  
 }
