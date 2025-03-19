@@ -11,8 +11,10 @@ const int JOYSTICK_BUTTON = 14;  // Optional button pin
 
 const int JOYSTICK_DEADZONE = 100;
 const int JOYSTICK_CENTER = 512; 
-const int OBSTACLE_THRESHOLD = 8; 
+const int OBSTACLE_THRESHOLD = 10; 
 
+unsigned long lastButtonDebounceTime = 0;
+const long debounceDelay = 200;
 
 void motorSetup() { 
   pinMode(in1, OUTPUT);
@@ -29,7 +31,6 @@ void motorSetup() {
   pinMode(JOYSTICK_X, INPUT);
   pinMode(JOYSTICK_Y, INPUT);
   pinMode(JOYSTICK_BUTTON, INPUT_PULLUP);
-  
   Serial.println("Motor and joystick setup complete");
 }
 
@@ -136,14 +137,6 @@ void handleJoystickControl() {
   int xOffset = xValue - JOYSTICK_CENTER;
   int yOffset = yValue - JOYSTICK_CENTER;
 
-  static int lastButtonState = HIGH;
-  
-  if (buttonState == LOW && lastButtonState == HIGH) {
-    obstacleAvoidanceEnabled = !obstacleAvoidanceEnabled;
-    Serial.print("Obstacle avoidance ");
-    Serial.println(obstacleAvoidanceEnabled ? "ENABLED" : "DISABLED");
-  }
-  lastButtonState = buttonState;
 
   /*
   Serial.print("Joystick X: ");
@@ -162,7 +155,6 @@ void handleJoystickControl() {
     stopMotors();
     return;
   }
-  
  
   if (abs(yOffset) > abs(xOffset)) {
     if (yOffset < 0) {
@@ -179,6 +171,23 @@ void handleJoystickControl() {
   }
 }
 
+void checkButtonPress() {
+  int buttonState = digitalRead(JOYSTICK_BUTTON);
+  
+  // Simple debounce
+  if (buttonState == LOW) {
+    // Button is pressed
+    unsigned long currentTime = millis();
+    if (currentTime - lastButtonDebounceTime > debounceDelay) {
+      // Toggle obstacle avoidance mode
+      obstacleAvoidanceEnabled = !obstacleAvoidanceEnabled;
+      Serial.print("Obstacle avoidance ");
+      Serial.println(obstacleAvoidanceEnabled ? "ENABLED" : "DISABLED");
+      
+      lastButtonDebounceTime = currentTime;
+    }
+  }
+}
 
 void autopilot() {
   if (!obstacleAvoidanceEnabled) return;
@@ -247,7 +256,6 @@ void autopilot() {
 void motorLoop() {
   Serial.println("\nCurrent sensor readings:");
   
-  
   for(int i = 0; i < NUM_SENSORS; i++) {
     Serial.print("Sensor ");
     Serial.print(i);
@@ -256,6 +264,7 @@ void motorLoop() {
     Serial.println("cm");
   }
 
+  checkButtonPress();
 
   if (obstacleAvoidanceEnabled) {
     autopilot();
