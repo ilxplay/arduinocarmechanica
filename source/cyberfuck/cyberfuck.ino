@@ -1,3 +1,4 @@
+#include "globals.h"
 
 void setup() {
   Serial.begin(9600);
@@ -12,6 +13,8 @@ void setup() {
 }
 void loop() {
   //shockDetectionLoop();
-  ultrasonicLoop();
+  if(obstacleAvoidanceEnabled == true){
+    ultrasonicLoop();
+  }
   motorLoop();
 }

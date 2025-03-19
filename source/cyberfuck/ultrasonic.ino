@@ -43,8 +43,6 @@ void ultrasonicLoop() {
     Serial.println(" cm");
   }
   
-  
-  
   Serial.println("---------------");
 }
 

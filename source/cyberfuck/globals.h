@@ -17,6 +17,7 @@ extern const int NUM_SENSORS;
 extern int distance[];
 
 //joystick
+extern bool obstacleAvoidanceEnabled = false;
 extern int dataX;
 extern int dataY;
 #endif
