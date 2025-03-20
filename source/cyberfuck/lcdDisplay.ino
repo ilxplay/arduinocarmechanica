@@ -20,5 +20,5 @@ void lcdLoop() {
     lcd.print("Autopilot Disabled");
   }
 
-  delay(100);
+  delay(500);
 }
