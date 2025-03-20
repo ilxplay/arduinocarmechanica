@@ -5,16 +5,18 @@ void setup() {
   //buzzerSetup();
   //shockDetectionSetup();
   //lcdsetup();
-
+  //matrixSetup();
   ultrasonicSetup();
   motorSetup();
   handleJoystickControl();
-  
+  lcdSetup();
 }
 void loop() {
   //shockDetectionLoop();
+  //matrixLoop();
   if(obstacleAvoidanceEnabled == true){
     ultrasonicLoop();
   }
   motorLoop();
+  lcdLoop();
 }

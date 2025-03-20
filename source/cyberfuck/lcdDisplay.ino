@@ -1,11 +1,17 @@
 #include <LiquidCrystal.h>
-//LiquidCrystal lcd(19, 18, 17, 16, 15, 14); //mega
-LiquidCrystal lcd(12, 11, 10, 9, 8, 7); //uno
+LiquidCrystal lcd(27, 26, 25, 24, 23, 22);
 void lcdSetup() {
 lcd.begin(16, 2);
 lcd.print("CyberFuck");
 }
-/*
+
+
 void lcdLoop() {
+  if(obstacleAvoidanceEnabled == true)
+  {
+    lcd.print("Autopilot enabled");
+  }
+  else{
+    lcd.print("Autopilot Disabled");
+  }
 }
-*/
