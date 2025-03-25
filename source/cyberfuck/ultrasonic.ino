@@ -3,7 +3,7 @@
 
 const int TRIG_PINS[] = {2, 4, 6, 8};
 const int ECHO_PINS[] = {3, 5, 7, 9};
-const int NUM_SENSORS = 4;
+
 
 long duration[NUM_SENSORS];
 int distance[NUM_SENSORS];

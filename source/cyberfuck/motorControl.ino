@@ -1,262 +1,230 @@
 #include "globals.h"
 
-int in1 = 13; // IN1 connected to digital pin 13 
-int in2 = 12; // IN2 connected to digital pin 12 
-int in3 = 11; // IN3 connected to digital pin 11 
-int in4 = 10; // IN4 connected to digital pin 10 
 
-const int JOYSTICK_X = A8;  // X-axis analog pin
-const int JOYSTICK_Y = A9;  // Y-axis analog pin
-const int JOYSTICK_BUTTON = 14;  // Optional button pin
-
-const int JOYSTICK_DEADZONE = 100;
-const int JOYSTICK_CENTER = 512; 
-const int OBSTACLE_THRESHOLD = 10; 
+int in1 = 5;  // Motor A direction 1 (PWM)
+int in2 = 6;  // Motor A direction 2 (PWM)
+int in3 = 9;  // Motor B direction 1 (PWM)
+int in4 = 10; // Motor B direction 2 (PWM)
 
 unsigned long lastButtonDebounceTime = 0;
 const long debounceDelay = 200;
 
-void motorSetup() { 
+extern bool obstacleAvoidanceEnabled = false;
+float filteredDistance[NUM_SENSORS][FILTER_SIZE];
+int filterIndex[NUM_SENSORS] = {0};
+
+AutopilotState currentState = STOPPED;
+unsigned long stateStartTime = 0;
+int lastTurnDirection = 1; // 1 = right | -1 = left
+
+void motorSetup() {
   pinMode(in1, OUTPUT);
-  pinMode(in2, OUTPUT); 
+  pinMode(in2, OUTPUT);
   pinMode(in3, OUTPUT);
-  pinMode(in4, OUTPUT); 
-  
-  digitalWrite(in1, HIGH); 
-  digitalWrite(in2, HIGH); 
-  digitalWrite(in3, HIGH); 
-  digitalWrite(in4, HIGH); 
-  
-  // Setup joystick pins
+  pinMode(in4, OUTPUT);
+
+  digitalWrite(in1, HIGH);
+  digitalWrite(in2, HIGH);
+  digitalWrite(in3, HIGH);
+  digitalWrite(in4, HIGH);
+
   pinMode(JOYSTICK_X, INPUT);
   pinMode(JOYSTICK_Y, INPUT);
   pinMode(JOYSTICK_BUTTON, INPUT_PULLUP);
+
+  for (int i = 0; i < NUM_SENSORS; i++) {
+    for (int j = 0; j < FILTER_SIZE; j++) {
+      filteredDistance[i][j] = 0;
+    }
+  }
+
   Serial.println("Motor and joystick setup complete");
 }
 
 void motorA(int speed) {
-  if (speed < 0) {
-    speed = abs(speed);
-    analogWrite(in1, speed);
-  }
-  else if (speed == 0) {
+  if (speed > 0) { // forward
     digitalWrite(in1, LOW);
+    analogWrite(in2, constrain(speed, 0, MAX_SPEED));
+  } else if (speed < 0) { // backward
     digitalWrite(in2, LOW);
-  }
-  else if (speed > 0) {
-    analogWrite(in2, speed);
+    analogWrite(in1, constrain(-speed, 0, MAX_SPEED));
+  } else { // stop
+    digitalWrite(in1, HIGH);
+    digitalWrite(in2, HIGH);
   }
 }
 
 void motorB(int speed) {
-  if (speed < 0) {
-    speed = abs(speed);
-    analogWrite(in3, speed);
-  }
-  else if (speed == 0) {
+  if (speed > 0) { // forward
     digitalWrite(in3, LOW);
+    analogWrite(in4, constrain(speed, 0, MAX_SPEED));
+  } else if (speed < 0) { // backward
     digitalWrite(in4, LOW);
+    analogWrite(in3, constrain(-speed, 0, MAX_SPEED));
+  } else { // stop
+    digitalWrite(in3, HIGH);
+    digitalWrite(in4, HIGH);
   }
-  else if (speed > 0) {
-    analogWrite(in4, speed);
-  }
 }
 
-void moveForward() {
-  Serial.println("Moving Forward");
-  digitalWrite(in1, LOW);  // Motor A(rechts) backwards
-  digitalWrite(in2, HIGH); // Motor A(rechts) forward
-  digitalWrite(in3, LOW);  // Motor B(links) backwards
-  digitalWrite(in4, HIGH); // Motor B(links) forwards
+void setMotorSpeeds(int leftSpeed, int rightSpeed) {
+  motorB(leftSpeed);  // left motor
+  motorA(rightSpeed); // right motor
 }
-
-void moveBackward() {
-  Serial.println("Moving Backward");
-  digitalWrite(in1, HIGH);  // Motor A backward
-  digitalWrite(in2, LOW);
-  digitalWrite(in3, HIGH);  // Motor B backward
-  digitalWrite(in4, LOW);
-}
-
-void turnRight() {
-  Serial.println("Turning Right");
-  digitalWrite(in2, LOW);   // Motor A forward
-  digitalWrite(in1, HIGH);
-  digitalWrite(in4, HIGH);  // Motor B backward
-  digitalWrite(in3, LOW);
-}
-
-void turnLeft() {
-  Serial.println("Turning Left");
-  digitalWrite(in2, HIGH);  // Motor A backward
-  digitalWrite(in1, LOW);
-  digitalWrite(in4, LOW);   // Motor B forward
-  digitalWrite(in3, HIGH);
-}
-
-void stopMotors() {
-  Serial.println("Stopping Motors");
-  digitalWrite(in1, HIGH);
-  digitalWrite(in2, HIGH);
-  digitalWrite(in3, HIGH);
-  digitalWrite(in4, HIGH);
-}
-
-void moveRightForward() {
-  Serial.println("Moving Right-Forward");
-  digitalWrite(in1, LOW);   // Motor A forward (full speed)
-  digitalWrite(in2, HIGH);
-  digitalWrite(in3, LOW);   // Motor B forward (reduced speed - implemented via PWM in advanced version)
-  digitalWrite(in4, HIGH);
-}
-
-void moveLeftForward() {
-  Serial.println("Moving Left-Forward");
-  digitalWrite(in1, LOW);   // Motor A forward (reduced speed - implemented via PWM in advanced version)
-  digitalWrite(in2, HIGH);
-  digitalWrite(in3, LOW);   // Motor B forward (full speed)
-  digitalWrite(in4, HIGH);
-}
-
-
-bool isObstacleDetected() {
-  for(int i = 0; i < NUM_SENSORS; i++) {
-    if(distance[i] < OBSTACLE_THRESHOLD && distance[i] > 0) {
-      return true;
-    }
-  }
-  return false;
-}
-
 
 void handleJoystickControl() {
   int xValue = analogRead(JOYSTICK_X);
   int yValue = analogRead(JOYSTICK_Y);
-  int buttonState = digitalRead(JOYSTICK_BUTTON);
-  
   int xOffset = xValue - JOYSTICK_CENTER;
   int yOffset = yValue - JOYSTICK_CENTER;
 
-
-  /*
-  Serial.print("Joystick X: ");
-  Serial.print(xValue);
-  Serial.print(" (");
-  Serial.print(xOffset);
-  Serial.print("), Y: ");
-  Serial.print(yValue);
-  Serial.print(" (");
-  Serial.print(yOffset);
-  Serial.print("), Button: ");
-  Serial.println(buttonState);
-  */
-  
   if (abs(xOffset) < JOYSTICK_DEADZONE && abs(yOffset) < JOYSTICK_DEADZONE) {
-    stopMotors();
+    setMotorSpeeds(0, 0);
     return;
   }
- 
-  if (abs(yOffset) > abs(xOffset)) {
-    if (yOffset < 0) {
-      moveForward();
-    } else {
-      moveBackward();
-    }
-  } else {
-    if (xOffset > 0) {
-      turnRight();
-    } else {
-      turnLeft();
-    }
-  }
+
+  int linearSpeed = map(yOffset, -512, 512, -MAX_SPEED, MAX_SPEED);
+  int angularSpeed = map(xOffset, -512, 512, -MAX_SPEED, MAX_SPEED);
+  int leftSpeed = linearSpeed - angularSpeed;
+  int rightSpeed = linearSpeed + angularSpeed;
+
+  leftSpeed = constrain(leftSpeed, -MAX_SPEED, MAX_SPEED);
+  rightSpeed = constrain(rightSpeed, -MAX_SPEED, MAX_SPEED);
+  setMotorSpeeds(leftSpeed, rightSpeed);
+
+  Serial.print("Manual - Left: ");
+  Serial.print(leftSpeed);
+  Serial.print(", Right: ");
+  Serial.println(rightSpeed);
 }
 
 void checkButtonPress() {
   int buttonState = digitalRead(JOYSTICK_BUTTON);
-  
-  // Simple debounce
   if (buttonState == LOW) {
-    // Button is pressed
     unsigned long currentTime = millis();
     if (currentTime - lastButtonDebounceTime > debounceDelay) {
-      // Toggle obstacle avoidance mode
       obstacleAvoidanceEnabled = !obstacleAvoidanceEnabled;
       Serial.print("Obstacle avoidance ");
       Serial.println(obstacleAvoidanceEnabled ? "ENABLED" : "DISABLED");
-      
+      if (!obstacleAvoidanceEnabled) {
+        setMotorSpeeds(0, 0); // stop
+        currentState = STOPPED;
+      } else {
+        currentState = EXPLORING;
+      }
       lastButtonDebounceTime = currentTime;
     }
   }
 }
 
-void autopilot() {
-  if (!obstacleAvoidanceEnabled) return;
-  
-  bool frontBlocked = (distance[SENSOR_FRONT] < OBSTACLE_THRESHOLD && distance[SENSOR_FRONT] > 0);
-  bool leftBlocked = (distance[SENSOR_LEFT] < OBSTACLE_THRESHOLD && distance[SENSOR_LEFT] > 0);
-  bool rightBlocked = (distance[SENSOR_RIGHT] < OBSTACLE_THRESHOLD && distance[SENSOR_RIGHT] > 0);
-  bool backBlocked = (distance[SENSOR_BACK] < OBSTACLE_THRESHOLD && distance[SENSOR_BACK] > 0);
-  
-  /*
-  Serial.println("Autopilot Status:");
-  Serial.print("Front: "); Serial.print(frontBlocked ? "BLOCKED" : "CLEAR");
-  Serial.print(" ("); Serial.print(distance[SENSOR_FRONT]); Serial.println("cm)");
-  Serial.print("Left: "); Serial.print(leftBlocked ? "BLOCKED" : "CLEAR");
-  Serial.print(" ("); Serial.print(distance[SENSOR_LEFT]); Serial.println("cm)");
-  Serial.print("Right: "); Serial.print(rightBlocked ? "BLOCKED" : "CLEAR");
-  Serial.print(" ("); Serial.print(distance[SENSOR_RIGHT]); Serial.println("cm)");
-  Serial.print("Back: "); Serial.print(backBlocked ? "BLOCKED" : "CLEAR");
-  Serial.print(" ("); Serial.print(distance[SENSOR_BACK]); Serial.println("cm)");
-  */
+float getFilteredDistance(int sensor) {
+  // Update filter with latest reading
+  int rawDistance = (distance[sensor] > 0) ? distance[sensor] : 1000;
+  filteredDistance[sensor][filterIndex[sensor]] = rawDistance;
+  filterIndex[sensor] = (filterIndex[sensor] + 1) % FILTER_SIZE;
 
-
-  if (!frontBlocked && !leftBlocked && !rightBlocked) {
-    moveForward();
-    return;
+  // Compute moving average
+  float sum = 0;
+  for (int i = 0; i < FILTER_SIZE; i++) {
+    sum += filteredDistance[sensor][i];
   }
-  
-  if (frontBlocked) {
-    if (!leftBlocked && !rightBlocked) {
-      if (distance[SENSOR_LEFT] > distance[SENSOR_RIGHT]) {
-        Serial.println("Front blocked, turning left (more space)");
-        turnLeft();
-      } else {
-        Serial.println("Front blocked, turning right (more space)");
-        turnRight();
-      }
-    } else if (!leftBlocked) {
-      Serial.println("Front blocked, right blocked, turning left");
-      turnLeft();
-    } else if (!rightBlocked) {
-      Serial.println("Front blocked, left blocked, turning right");
-      turnRight();
-    } else if (!backBlocked) {
-      Serial.println("Front, left, and right blocked, moving backward");
-      moveBackward();
-    } else {
-      Serial.println("All directions blocked, stopping");
-      stopMotors();
-    }
-    return;
-  }
-  
-  if (leftBlocked && !rightBlocked) {
-    Serial.println("Left blocked, moving right-forward");
-    moveRightForward();
-  } else if (rightBlocked && !leftBlocked) {
-    Serial.println("Right blocked, moving left-forward");
-    moveLeftForward();
-  } else {
-    Serial.println("Sides blocked, moving forward carefully");
-    moveForward();
-  }
+  return sum / FILTER_SIZE;
 }
 
+void autopilot() {
+  // get filtered sensor readingss
+  float front = getFilteredDistance(SENSOR_FRONT);
+  float left = getFilteredDistance(SENSOR_LEFT);
+  float right = getFilteredDistance(SENSOR_RIGHT);
+  float back = getFilteredDistance(SENSOR_BACK);
+
+  int speed = 0;
+  float steering = 0;
+  unsigned long currentTime = millis();
+
+  switch (currentState) {
+    case EXPLORING:
+      if (front > MIN_DISTANCE) {
+        speed = K_SPEED * (front - DESIRED_DISTANCE);
+        speed = constrain(speed, 0, MAX_SPEED);
+        steering = K_STEER * (left - right);
+        if (front < DESIRED_DISTANCE || left < DESIRED_DISTANCE || right < DESIRED_DISTANCE) {
+          currentState = AVOIDING_OBSTACLE;
+          stateStartTime = currentTime;
+        }
+      } else {
+        currentState = REVERSING;
+        stateStartTime = currentTime;
+      }
+      break;
+
+    case AVOIDING_OBSTACLE:
+      speed = K_SPEED * (front - DESIRED_DISTANCE);
+      speed = constrain(speed, 0, MAX_SPEED / 2); // slower
+      steering = K_STEER * (left - right) * 1.5; // amplify/intensify steering
+      if (front < MIN_DISTANCE) {
+        currentState = REVERSING;
+        stateStartTime = currentTime;
+      } else if (front > DESIRED_DISTANCE * 2 && left > DESIRED_DISTANCE && right > DESIRED_DISTANCE) {
+        currentState = EXPLORING;
+      }
+      break;
+
+    case REVERSING:
+      if (back > MIN_DISTANCE) {
+        speed = -K_SPEED * (back - DESIRED_DISTANCE);
+        speed = constrain(speed, -MAX_SPEED, 0);
+        steering = K_STEER * (left - right);
+        if (currentTime - stateStartTime > 2000) { // 2 seconds reversing
+          currentState = ESCAPING;
+          stateStartTime = currentTime;
+          lastTurnDirection = (left > right) ? 1 : -1; // turns towards more space
+        }
+      } else {
+        currentState = STOPPED;
+      }
+      break;
+
+    case ESCAPING:
+      speed = 0;
+      steering = lastTurnDirection * MAX_SPEED; // turns in place
+      if (currentTime - stateStartTime > 500) { // turns for 500 miliseconds
+        currentState = (front > MIN_DISTANCE) ? EXPLORING : REVERSING;
+        stateStartTime = currentTime;
+      }
+      break;
+
+    case STOPPED:
+      speed = 0;
+      steering = 0;
+      if (front > MIN_DISTANCE && back > MIN_DISTANCE) {
+        currentState = EXPLORING;
+      }
+      break;
+  }
+
+  int leftSpeed = speed + steering;
+  int rightSpeed = speed - steering;
+  leftSpeed = constrain(leftSpeed, -MAX_SPEED, MAX_SPEED);
+  rightSpeed = constrain(rightSpeed, -MAX_SPEED, MAX_SPEED);
+  setMotorSpeeds(leftSpeed, rightSpeed);
+
+  // debugging output
+  Serial.print("State: ");
+  Serial.print(currentState);
+  Serial.print(", Speed: ");
+  Serial.print(speed);
+  Serial.print(", Steering: ");
+  Serial.print(steering);
+  Serial.print(", Left: ");
+  Serial.print(leftSpeed);
+  Serial.print(", Right: ");
+  Serial.println(rightSpeed);
+}
 
 void motorLoop() {
   Serial.println("\nCurrent sensor readings:");
-  
-  for(int i = 0; i < NUM_SENSORS; i++) {
+  for (int i = 0; i < NUM_SENSORS; i++) {
     Serial.print("Sensor ");
     Serial.print(i);
     Serial.print(": ");
@@ -265,13 +233,9 @@ void motorLoop() {
   }
 
   checkButtonPress();
-
   if (obstacleAvoidanceEnabled) {
     autopilot();
   } else {
     handleJoystickControl();
   }
-  
-  delay(10);
 }
-
