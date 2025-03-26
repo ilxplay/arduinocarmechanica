@@ -238,7 +238,7 @@ void autopilot() {
   Serial.print("State: ");
   Serial.print(currentState);
   Serial.print(" \n");
-  Serial.print(", Speed: ");
+  Serial.print("Speed: ");
   Serial.print(speed);
   Serial.print(", Steering: ");
   Serial.print(steering);
