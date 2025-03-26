@@ -20,7 +20,7 @@ extern int dataY;
 const int JOYSTICK_X = A8;
 const int JOYSTICK_Y = A9;
 const int JOYSTICK_BUTTON = 14;
-const int JOYSTICK_DEADZONE = 100;
+const int JOYSTICK_DEADZONE = 50;
 const int JOYSTICK_CENTER = 512;
 const int MAX_SPEED = 255;
 const int MIN_DISTANCE = 10; // minimum safe distance in cm

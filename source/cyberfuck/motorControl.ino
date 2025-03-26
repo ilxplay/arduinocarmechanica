@@ -75,33 +75,51 @@ void setMotorSpeeds(int leftSpeed, int rightSpeed) {
 void handleJoystickControl() {
   int xValue = analogRead(JOYSTICK_X);
   int yValue = analogRead(JOYSTICK_Y);
+  
+  // Detailed debugging output
+  Serial.print("Raw Joystick Values - X: ");
+  Serial.print(xValue);
+  Serial.print(" Y: ");
+  Serial.println(yValue);
+  
   int xOffset = xValue - JOYSTICK_CENTER;
   int yOffset = yValue - JOYSTICK_CENTER;
-
-  // Apply deadzone to prevent minor movement
+  
+  Serial.print("Joystick Offsets - X: ");
+  Serial.print(xOffset);
+  Serial.print(" Y: ");
+  Serial.println(yOffset);
+  
+  // Check if within deadzone
   if (abs(xOffset) < JOYSTICK_DEADZONE && abs(yOffset) < JOYSTICK_DEADZONE) {
+    Serial.println("Joystick in deadzone - Stopping motors");
     setMotorSpeeds(0, 0);
     return;
   }
 
-  // Separate calculations for forward/backward and turning
+  // Map offsets to motor speeds
   int forwardSpeed = map(yOffset, -512, 512, -MAX_SPEED, MAX_SPEED);
   int turnSpeed = map(xOffset, -512, 512, -MAX_SPEED, MAX_SPEED);
+  
+  Serial.print("Calculated Speeds - Forward: ");
+  Serial.print(forwardSpeed);
+  Serial.print(" Turn: ");
+  Serial.println(turnSpeed);
 
-  // Calculate new motor speeds
+  // Calculate motor speeds
   int leftSpeed = forwardSpeed + turnSpeed;
   int rightSpeed = forwardSpeed - turnSpeed;
 
-  // Constrain speeds to prevent overflow
+  // Constrain speeds
   leftSpeed = constrain(leftSpeed, -MAX_SPEED, MAX_SPEED);
   rightSpeed = constrain(rightSpeed, -MAX_SPEED, MAX_SPEED);
 
-  setMotorSpeeds(leftSpeed, rightSpeed);
-
-  Serial.print("Manual - Left: ");
+  Serial.print("Motor Speeds - Left: ");
   Serial.print(leftSpeed);
-  Serial.print(", Right: ");
+  Serial.print(" Right: ");
   Serial.println(rightSpeed);
+
+  setMotorSpeeds(leftSpeed, rightSpeed);
 }
 
 void checkButtonPress() {
@@ -136,6 +154,7 @@ float getFilteredDistance(int sensor) {
   }
   return sum / FILTER_SIZE;
 }
+
 
 void autopilot() {
   // get filtered sensor readingss
@@ -218,6 +237,7 @@ void autopilot() {
   // debugging output
   Serial.print("State: ");
   Serial.print(currentState);
+  Serial.print(" \n");
   Serial.print(", Speed: ");
   Serial.print(speed);
   Serial.print(", Steering: ");
@@ -230,13 +250,7 @@ void autopilot() {
 
 void motorLoop() {
   Serial.println("\nCurrent sensor readings:");
-  for (int i = 0; i < NUM_SENSORS; i++) {
-    Serial.print("Sensor ");
-    Serial.print(i);
-    Serial.print(": ");
-    Serial.print(distance[i]);
-    Serial.println("cm");
-  }
+  
 
   checkButtonPress();
   if (obstacleAvoidanceEnabled) {
