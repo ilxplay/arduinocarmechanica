@@ -1,15 +1,15 @@
 #include "globals.h"
 
 
-int in1 = 5;  // Motor A direction 1 (PWM)
-int in2 = 6;  // Motor A direction 2 (PWM)
-int in3 = 9;  // Motor B direction 1 (PWM)
+int in1 = 44;  // Motor A direction 1 (PWM)
+int in2 = 45; // Motor A direction 2 (PWM)
+int in3 = 46;  // Motor B direction 1 (PWM)
 int in4 = 10; // Motor B direction 2 (PWM)
 
 unsigned long lastButtonDebounceTime = 0;
 const long debounceDelay = 200;
 
-extern bool obstacleAvoidanceEnabled = false;
+extern bool obstacleAvoidanceEnabled;
 float filteredDistance[NUM_SENSORS][FILTER_SIZE];
 int filterIndex[NUM_SENSORS] = {0};
 
@@ -78,18 +78,24 @@ void handleJoystickControl() {
   int xOffset = xValue - JOYSTICK_CENTER;
   int yOffset = yValue - JOYSTICK_CENTER;
 
+  // Apply deadzone to prevent minor movement
   if (abs(xOffset) < JOYSTICK_DEADZONE && abs(yOffset) < JOYSTICK_DEADZONE) {
     setMotorSpeeds(0, 0);
     return;
   }
 
-  int linearSpeed = map(yOffset, -512, 512, -MAX_SPEED, MAX_SPEED);
-  int angularSpeed = map(xOffset, -512, 512, -MAX_SPEED, MAX_SPEED);
-  int leftSpeed = linearSpeed - angularSpeed;
-  int rightSpeed = linearSpeed + angularSpeed;
+  // Separate calculations for forward/backward and turning
+  int forwardSpeed = map(yOffset, -512, 512, -MAX_SPEED, MAX_SPEED);
+  int turnSpeed = map(xOffset, -512, 512, -MAX_SPEED, MAX_SPEED);
 
+  // Calculate new motor speeds
+  int leftSpeed = forwardSpeed + turnSpeed;
+  int rightSpeed = forwardSpeed - turnSpeed;
+
+  // Constrain speeds to prevent overflow
   leftSpeed = constrain(leftSpeed, -MAX_SPEED, MAX_SPEED);
   rightSpeed = constrain(rightSpeed, -MAX_SPEED, MAX_SPEED);
+
   setMotorSpeeds(leftSpeed, rightSpeed);
 
   Serial.print("Manual - Left: ");

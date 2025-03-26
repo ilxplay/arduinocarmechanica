@@ -12,7 +12,7 @@ extern const int NUM_SENSORS = 4;
 extern int distance[];
 
 // Joystick
-extern bool obstacleAvoidanceEnabled;
+extern bool obstacleAvoidanceEnabled = false;
 extern int dataX;
 extern int dataY;
 
