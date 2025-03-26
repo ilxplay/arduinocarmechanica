@@ -8,7 +8,7 @@ void lcdSetup() {
 }
 
 void lcdLoop() {
-
+  
   lcd.setCursor(0, 1);
   lcd.clear();
 
