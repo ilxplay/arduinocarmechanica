@@ -4,12 +4,12 @@
 
 int DIN = 31;
 int CS = 32;
-int CLK = 32;
+int CLK = 33;
 LedControl lc=LedControl(DIN, CLK, CS,0);
 
 int position=0;
 
-int   Marios_ideas [8] [54] ={
+int display [8] [54] ={
   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
    {0,1,0,0,0,1,0,0,1,1,0,0,1,1,1,0,0,0,0,0,1,1,0,1,0,1,1,0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,1,1,0,0,0,1,1,0,0,0,0},
    {0,1,1,0,1,1,0,1,0,0,1,0,1,0,0,1,0,1,0,1,0,0,1,0,1,0,0,1,0,0,0,1,0,1,0,0,1,0,1,0,0,0,1,0,0,1,0,1,0,0,1,0,0,0},
@@ -21,17 +21,17 @@ int   Marios_ideas [8] [54] ={
    };
 
 
-void setup() {
+void matrixSetup() {
 
    lc.shutdown(0,false);
    lc.setIntensity(0,0);
-    lc.clearDisplay(0);
+  lc.clearDisplay(0);
 }
 
-void loop() {
+void matrixLoop() {
   for (int j=0;j<8;j++){
      for (int i=0;i<8;i++){
-    lc.setLed(0,i,j,Marios_ideas[j][(i+position)-abs((i+position)/54)*54]);
+    lc.setLed(0,i,j,display[j][(i+position)-abs((i+position)/54)*54]);
      }
   }
   delay(20);

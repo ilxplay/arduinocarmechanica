@@ -10,6 +10,7 @@ void setup() {
   motorSetup();
   handleJoystickControl();
   lcdSetup();
+  matrixSetup();
 }
 void loop() {
   //shockDetectionLoop();
@@ -19,4 +20,6 @@ void loop() {
   }
   motorLoop();
   lcdLoop();
+  headlightloop();
+  matrixLoop();
 }
