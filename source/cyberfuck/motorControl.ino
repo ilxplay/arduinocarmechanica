@@ -257,16 +257,26 @@ void motorLoop() {
   int xValue = analogRead(JOYSTICK_X);
   int yValue = analogRead(JOYSTICK_Y);
   
-  // Calculate offsets from center
   int xOffset = xValue - JOYSTICK_CENTER;
   int yOffset = yValue - JOYSTICK_CENTER;
 
+  Serial.print("xOffset: ");
+  Serial.print(xOffset);
+  Serial.print(" yOffset: ");
+  Serial.println(yOffset);
+
   const int JOYSTICK_NEUTRAL_ZONE = 20;
 
-    if (abs(xOffset) < JOYSTICK_NEUTRAL_ZONE && abs(yOffset) < JOYSTICK_NEUTRAL_ZONE) {
-    Serial.println("Joystick in default position - showing straight arrow");
-    showStraightArrow();
-  } else if (abs(xOffset) > abs(yOffset)) {
+  if (abs(yOffset) > JOYSTICK_NEUTRAL_ZONE) {
+    if (yOffset > JOYSTICK_NEUTRAL_ZONE) {
+      Serial.println("Moving BACKWARD");
+      showBackwardArrow();
+    } else if (yOffset < -JOYSTICK_NEUTRAL_ZONE) {
+      Serial.println("Moving FORWARD");
+      showStraightArrow();
+      
+    }
+  } else if (abs(xOffset) > JOYSTICK_NEUTRAL_ZONE) {
     if (xOffset > JOYSTICK_NEUTRAL_ZONE) {
       Serial.println("Attempting to show RIGHT arrow");
       showRightArrow();
@@ -278,8 +288,9 @@ void motorLoop() {
     }
   } else {
     Serial.println("No significant joystick movement");
-    lc.clearDisplay(0);  // Clear display if no movement
+    lc.clearDisplay(0); 
   }
+
   checkButtonPress();
   if (obstacleAvoidanceEnabled) {
     autopilot();

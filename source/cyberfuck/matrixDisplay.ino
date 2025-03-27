@@ -75,7 +75,7 @@ void showStraightArrow() {
   }
 }
 
-void showbackArrow() {
+void showBackwardArrow() {
   for(int row = 0; row < 8; row++) {
     lc.setRow(0, row, backArrow[row]);
   }
