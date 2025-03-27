@@ -1,4 +1,4 @@
-int ledPin = 41;  // LED connected to digital pin 10
+int ledPin = 11;  // LED connected to digital pin 10
 
 void headlightloop() {
   int value = (1023 - analogRead(A5)) / 4;
