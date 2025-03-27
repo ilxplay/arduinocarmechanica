@@ -9,10 +9,10 @@ LedControl lc=LedControl(DIN, CLK, CS,0);
 byte rightArrow[8] = {
   B00001000, // Tip of arrow
   B00001100, 
-  B00000110,
+  B00001110,
   B11111111,
   B11111111,
-  B00000110,
+  B00001110,
   B00001100,
   B00001000  // Base of arrow
 };
@@ -21,10 +21,10 @@ byte rightArrow[8] = {
 byte leftArrow[8] = {
   B00010000, // Tip of arrow
   B00110000, 
-  B01100000,
+  B01110000,
   B11111111,
   B11111111,
-  B01100000,
+  B01110000,
   B00110000,
   B00010000  // Base of arrow
 };
