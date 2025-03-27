@@ -40,6 +40,17 @@ byte straightArrow[8] = {
    B00011000
 };
 
+byte backArrow[8] = {
+   B00011000, // Middle column filled
+   B00011000, // Wider middle section
+   B00011000, // Even wider
+   B00011000, // Full top row
+   B11111111, // Narrow base
+   B01111110,
+   B00111100,
+   B00011000
+};
+
 void matrixSetup() {
   lc.shutdown(0, false);   // Wake up display
   lc.setIntensity(0, 8);   // Set brightness (0-15)
@@ -61,5 +72,11 @@ void showLeftArrow() {
 void showStraightArrow() {
   for(int row = 0; row < 8; row++) {
     lc.setRow(0, row, straightArrow[row]);
+  }
+}
+
+void showbackArrow() {
+  for(int row = 0; row < 8; row++) {
+    lc.setRow(0, row, backArrow[row]);
   }
 }
