@@ -9,6 +9,9 @@ int in4 = 10; // Motor B direction 2 (PWM)
 unsigned long lastButtonDebounceTime = 0;
 const long debounceDelay = 200;
 
+int xOffset;
+int yOffset;
+
 extern bool obstacleAvoidanceEnabled;
 float filteredDistance[NUM_SENSORS][FILTER_SIZE];
 int filterIndex[NUM_SENSORS] = {0};
@@ -251,7 +254,32 @@ void autopilot() {
 void motorLoop() {
   Serial.println("\nCurrent sensor readings:");
   
+  int xValue = analogRead(JOYSTICK_X);
+  int yValue = analogRead(JOYSTICK_Y);
+  
+  // Calculate offsets from center
+  int xOffset = xValue - JOYSTICK_CENTER;
+  int yOffset = yValue - JOYSTICK_CENTER;
 
+  const int JOYSTICK_NEUTRAL_ZONE = 20;
+
+    if (abs(xOffset) < JOYSTICK_NEUTRAL_ZONE && abs(yOffset) < JOYSTICK_NEUTRAL_ZONE) {
+    Serial.println("Joystick in default position - showing straight arrow");
+    showStraightArrow();
+  } else if (abs(xOffset) > abs(yOffset)) {
+    if (xOffset > JOYSTICK_NEUTRAL_ZONE) {
+      Serial.println("Attempting to show RIGHT arrow");
+      showRightArrow();
+      Serial.println("~~~~~~~~right");
+    } else if (xOffset < -JOYSTICK_NEUTRAL_ZONE) {
+      Serial.println("Attempting to show LEFT arrow");
+      showLeftArrow();
+      Serial.println("~~~~~~~~left");
+    }
+  } else {
+    Serial.println("No significant joystick movement");
+    lc.clearDisplay(0);  // Clear display if no movement
+  }
   checkButtonPress();
   if (obstacleAvoidanceEnabled) {
     autopilot();

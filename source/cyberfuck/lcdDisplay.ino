@@ -7,6 +7,7 @@ void lcdSetup() {
   lcd.print("CyberFuck");
 }
 
+
 void lcdLoop() {
   
   lcd.setCursor(0, 1);

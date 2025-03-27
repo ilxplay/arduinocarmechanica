@@ -26,6 +26,7 @@ const int MAX_SPEED = 255;
 const int MIN_DISTANCE = 10; // minimum safe distance in cm
 const int DESIRED_DISTANCE = 20; // preferred distance from obstacles in cm
 
+
 // Autopilot parameters
 const float K_SPEED = 10.0; // speed gain
 const float K_STEER = 5.0;  // steering increase

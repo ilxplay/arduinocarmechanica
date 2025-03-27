@@ -21,5 +21,4 @@ void loop() {
   motorLoop();
   lcdLoop();
   headlightloop();
-  matrixLoop();
 }
