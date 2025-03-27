@@ -30,14 +30,14 @@ byte leftArrow[8] = {
 };
 
 byte straightArrow[8] = {
-  B00001000, // Middle column filled
-  B00011100, // Wider middle section
-  B00101010, // Even wider
-  B01001001, // Full top row
-  B00001000, // Narrow base
-  B00001000,
-  B00001000,
-  B00001000
+  B00011000, // Middle column filled
+  B00111100, // Wider middle section
+  B01111110, // Even wider
+  B11111111, // Full top row
+  B00011000, // Narrow base
+  B00011000,
+  B00011000,
+  B00011000
 };
 
 void matrixSetup() {
