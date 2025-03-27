@@ -7,14 +7,14 @@ LedControl lc=LedControl(DIN, CLK, CS,0);
 
 // Diagonal Right Arrow Pattern (8x8 matrix)
 byte rightArrow[8] = {
-  B00000001, // Tip of arrow
+  B00001111, // Tip of arrow
   B00000011, 
-  B00000110,
-  B00001100,
-  B00011000,
-  B00110000,
-  B01100000,
-  B11000000  // Base of arrow
+  B00000101,
+  B00001001,
+  B00010000,
+  B00100000,
+  B01000000,
+  B10000000  // Base of arrow
 };
 
 // Diagonal Left Arrow Pattern (8x8 matrix)
