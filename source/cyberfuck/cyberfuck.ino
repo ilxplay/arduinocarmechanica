@@ -4,12 +4,10 @@ void setup() {
   Serial.begin(9600);
   //buzzerSetup();
   //shockDetectionSetup();
-  //lcdsetup();
-  //matrixSetup();
+  //lcdSetup();
   ultrasonicSetup();
   motorSetup();
   handleJoystickControl();
-  lcdSetup();
   matrixSetup();
 }
 void loop() {
