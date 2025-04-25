@@ -5,5 +5,4 @@ void headlightloop() {
   if (value < 50) {value = 0;}
   value = abs(value);
   analogWrite(ledPin, value);
-  Serial.println("niggah");
 }
