@@ -289,6 +289,7 @@ void motorLoop() {
   } else {
     Serial.println("No significant joystick movement");
     lc.clearDisplay(0); 
+    showSussyArrow();
   }
 
   checkButtonPress();

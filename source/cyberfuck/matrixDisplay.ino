@@ -1,9 +1,9 @@
 #include <LedControl.h>
 
-int DIN = 31;
-int CS = 32;
-int CLK = 33;
-LedControl lc=LedControl(DIN, CLK, CS,0);
+int DIN = 26;
+int CS = 27;
+int CLK = 28;
+LedControl lc=LedControl(DIN, CS, CLK,0);
 
 // Diagonal Right Arrow Pattern (8x8 matrix)
 byte rightArrow[8] = {
@@ -14,7 +14,7 @@ byte rightArrow[8] = {
   B11111111,
   B00001110,
   B00001100,
-  B00001000  // Base of arrow
+  B00001000,  // Base of arrow
 };
 
 // Diagonal Left Arrow Pattern (8x8 matrix)
@@ -37,7 +37,7 @@ byte straightArrow[8] = {
    B00011000, // Narrow base
    B00011000,
    B00011000,
-   B00011000
+   B00011000,
 };
 
 byte backArrow[8] = {
@@ -48,13 +48,25 @@ byte backArrow[8] = {
    B11111111, // Narrow base
    B01111110,
    B00111100,
-   B00011000
+   B00011000,
+};
+
+byte sussy[8] = {
+   B11111111,
+   B11111111,
+   B00111100,
+   B00011000,
+   B00011000,
+   B00011000,
+   B00011000,
+   B00011000,
 };
 
 void matrixSetup() {
   lc.shutdown(0, false);   // Wake up display
   lc.setIntensity(0, 8);   // Set brightness (0-15)
-  lc.clearDisplay(0);      // Clear the display
+  lc.clearDisplay(0);
+  
 }
 
 void showRightArrow() {
@@ -78,5 +90,11 @@ void showStraightArrow() {
 void showBackwardArrow() {
   for(int row = 0; row < 8; row++) {
     lc.setRow(0, row, backArrow[row]);
+  }
+}
+
+void showSussyArrow() {
+  for(int row = 0; row < 8; row++) {
+    lc.setRow(0, row, sussy[row]);
   }
 }
