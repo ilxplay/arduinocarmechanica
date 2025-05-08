@@ -281,7 +281,7 @@ void motorLoop() {
       Serial.println("Attempting to show RIGHT arrow");
       showRightArrow();
       Serial.println("~~~~~~~~right");
-    } else if (xOffset < -JOYSTICK_NEUTRAL_ZONE) {
+    } else if (abs(xOffset) < -JOYSTICK_NEUTRAL_ZONE) {
       Serial.println("Attempting to show LEFT arrow");
       showLeftArrow();
       Serial.println("~~~~~~~~left");
